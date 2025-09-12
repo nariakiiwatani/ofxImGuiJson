@@ -1,0 +1,97 @@
+{
+  "type": "object",
+  "label": "Full Schema Example",
+  "ui:widget": "collapsible",
+  "properties": {
+    "enableFeature": {
+      "type": "boolean",
+      "label": "Enable Feature",
+      "default": true
+    },
+    "username": {
+      "type": "string",
+      "label": "Username",
+      "default": "guest"
+    },
+    "age": {
+      "type": "int",
+      "label": "Age",
+      "ui:widget": "slider",
+      "minimum": 0,
+      "maximum": 120,
+      "default": 25
+    },
+    "height": {
+      "type": "float",
+      "label": "Height (cm)",
+      "ui:widget": "drag",
+      "minimum": 50.0,
+      "maximum": 250.0,
+      "speed": 0.5,
+      "default": 170.0
+    },
+    "color": {
+      "type": "float",
+      "label": "Favorite Color RGB",
+      "size": 3,
+      "ui:widget": "slider",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": [0.3, 0.5, 0.8]
+    },
+    "hobbies": {
+      "type": "array",
+      "label": "Hobbies",
+      "ui:widget": "chips",
+      "items": {
+        "type": "string",
+        "default": "new hobby"
+      },
+      "minItems": 0,
+      "maxItems": 5,
+      "default": ["reading", "music"]
+    },
+    "scores": {
+      "type": "array",
+      "label": "Scores",
+      "ui:widget": "table",
+      "items": {
+        "type": "int",
+        "default": 50,
+        "minimum": 0,
+        "maximum": 100
+      },
+      "minItems": 1,
+      "maxItems": 10,
+      "default": [80, 90]
+    },
+    "profile": {
+      "type": "object",
+      "label": "Profile Info",
+      "ui:widget": "inline",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "label": "Nickname",
+          "default": "none"
+        },
+        "level": {
+          "type": "int",
+          "label": "Level",
+          "ui:widget": "drag",
+          "minimum": 1,
+          "maximum": 99,
+          "default": 10
+        },
+        "speed": {
+          "type": "float",
+          "label": "Speed",
+          "ui:widget": "slider",
+          "minimum": 0.0,
+          "maximum": 10.0,
+          "default": 5.0
+        }
+      }
+    }
+  }
+}
