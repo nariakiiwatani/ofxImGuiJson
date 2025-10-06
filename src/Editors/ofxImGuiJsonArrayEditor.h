@@ -12,36 +12,35 @@ bool EditArray(JsonType &arr, const JsonType *schema,
 			   const std::string &path)
 {
 	bool changed = false;
+	auto oldValue = arr;
 	std::string widget = schema ? schema->value("ui:widget", "") : "";
 	const JsonType *itemSchema = (schema && schema->contains("items")) ? &(*schema)["items"] : nullptr;
 
 	int minItems = schema ? schema->value("minItems", 0) : 0;
 	int maxItems = schema ? schema->value("maxItems", std::numeric_limits<int>::max()) : std::numeric_limits<int>::max();
 
-	auto drawItem = [&](int i) {
-		std::string childPath = path + "[" + std::to_string(i) + "]";
+	auto drawItem = [&](int i, std::string path) {
 		auto oldValue = arr[i];
 		ImGui::PushID(i);
-		bool elemChanged = EditWithSchema("[]", arr[i], itemSchema, callbacks, childPath);
+		bool changed = false;
+		if(EditWithSchema("[]", arr[i], itemSchema, callbacks, path)) {
+			InvokeMatchingCallbacks(callbacks, path, oldValue, arr[i]);
+			changed |= true;
+		}
 		ImGui::SameLine();
 		if(ImGui::SmallButton("x") && (int)arr.size() > minItems) {
 			arr.erase(arr.begin() + i);
-			InvokeMatchingCallbacks(callbacks, path, oldValue, arr);
-			changed = true;
+			changed |= true;
 		}
 		ImGui::PopID();
-		if(elemChanged) {
-			InvokeMatchingCallbacks(callbacks, childPath, oldValue, arr[i]);
-			InvokeMatchingCallbacks(callbacks, path, oldValue, arr);
-			changed = true;
-		}
+		return changed;
 	};
 	auto drawAddButton = [&]() {
 		if(ImGui::Button("+ add")) {
 			arr.push_back(itemSchema && itemSchema->contains("default") ? (*itemSchema)["default"] : "");
-			InvokeMatchingCallbacks(callbacks, path, JsonType(), arr);
-			changed = true;
+			return true;
 		}
+		return false;
 	};
 
 	if(widget == "table") {
@@ -49,12 +48,15 @@ bool EditArray(JsonType &arr, const JsonType *schema,
 			for(int i = 0; i < (int)arr.size(); ++i) {
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0); ImGui::Text("[%d]", i);
-				ImGui::TableSetColumnIndex(1); drawItem(i);
+				ImGui::TableSetColumnIndex(1);
+
+				std::string childPath = path + "[" + std::to_string(i) + "]";
+				changed |= drawItem(i, childPath);
 			}
 			if((int)arr.size() < maxItems) {
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
-				drawAddButton();
+				changed |= drawAddButton();
 			}
 			ImGui::EndTable();
 		}
@@ -81,7 +83,6 @@ bool EditArray(JsonType &arr, const JsonType *schema,
 			ImGui::SameLine();
 			if(ImGui::SmallButton("x") && (int)arr.size() > minItems) {
 				arr.erase(arr.begin() + i);
-				InvokeMatchingCallbacks(callbacks, path, JsonType(), arr);
 				changed = true;
 			}
 			ImGui::SameLine();
@@ -89,19 +90,22 @@ bool EditArray(JsonType &arr, const JsonType *schema,
 		}
 		ImGui::NewLine();
 		if((int)arr.size() < maxItems) {
-			drawAddButton();
+			changed |= drawAddButton();
 		}
 		ImGui::EndGroup();
 	}
 	else {
 		for(int i = 0; i < (int)arr.size(); ++i) {
-			drawItem(i);
+			std::string childPath = path + "[" + std::to_string(i) + "]";
+			changed |= drawItem(i, childPath);
 		}
 		if((int)arr.size() < maxItems) {
-			drawAddButton();
+			changed |= drawAddButton();
 		}
 	}
-
+	if(changed) {
+		InvokeMatchingCallbacks(callbacks, path, oldValue, arr);
+	}
 	return changed;
 }
 

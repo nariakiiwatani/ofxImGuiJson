@@ -35,6 +35,7 @@ bool EditNumericArray(JsonType &arr, const JsonType *schema,
 					  const std::string &path)
 {
 	if(!schema || !schema->contains("type") || !schema->contains("size")) return false;
+	auto oldValue = arr;
 	bool changed = false;
 
 	std::string baseType = (*schema)["type"].template get<std::string>();
@@ -101,9 +102,11 @@ bool EditNumericArray(JsonType &arr, const JsonType *schema,
 		if(elemChanged) {
 			arr[i] = isFloat ? JsonType(fvals[i]) : JsonType(ivals[i]);
 			InvokeMatchingCallbacks(callbacks, path + "[" + std::to_string(i) + "]", oldValue, arr[i]);
-			InvokeMatchingCallbacks(callbacks, path, oldValue, arr);
 			changed = true;
 		}
+	}
+	if(changed) {
+		InvokeMatchingCallbacks(callbacks, path, oldValue, arr);
 	}
 	return changed;
 }

@@ -78,7 +78,9 @@ bool EditPrimitive(JsonType &value, const JsonType *schema,
 		ImGui::TextDisabled("null");
 	}
 
-	if(changed) InvokeMatchingCallbacks(callbacks, path, oldValue, value);
+	if(changed) {
+		InvokeMatchingCallbacks(callbacks, path, oldValue, value);
+	}
 	return changed;
 }
 

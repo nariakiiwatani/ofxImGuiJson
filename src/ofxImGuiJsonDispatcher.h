@@ -12,6 +12,7 @@ bool EditWithSchema(const char *label, JsonType &data, const JsonType *schema,
 					const std::string &path)
 {
 	bool changed = false;
+	auto oldValue = data;
 	ImGui::PushID(label);
 
 	std::string type = schema && schema->contains("type") ? (*schema)["type"].template get<std::string>() : "";
